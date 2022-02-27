@@ -11,9 +11,18 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/static/index.html'));
 });
 
+const redirectUri = "oob";
+const serverAddr = encodeURI(redirectUri);
+console.log(redirectUri);
+console.log(serverAddr);
+
+
+const redirectAddress = 
+`https://api.login.yahoo.com/oauth2/request_auth?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${serverAddr}&response_type=code&language=en-us`;
+
 app.get('/auth', (req, res) => {
-  res.redirect(
-    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}`,
+  console.log("app.get auth");
+  res.redirect(redirectAddress,
   );
 });
 
@@ -24,8 +33,9 @@ app.get('/oauth-callback', ({ query: { code } }, res) => {
     code,
   };
   const opts = { headers: { accept: 'application/json' } };
+  console.log("app.get auth-callback + axios");
   axios
-    .post('https://github.com/login/oauth/access_token', body, opts)
+    .post('https://api.login.yahoo.com/oauth2/get_token', body, opts)
     .then((_res) => _res.data.access_token)
     .then((token) => {
       // eslint-disable-next-line no-console
